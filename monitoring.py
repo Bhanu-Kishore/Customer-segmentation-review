@@ -6,7 +6,7 @@ from evidently.presets import DataDriftPreset
 reference_data = pd.read_csv("data/customers.csv")
 
 # Current data
-current_data = pd.read_csv("data/customers.csv")
+current_data = pd.read_csv("data/current_customers.csv")
 
 # Create monitoring report
 report = Report(

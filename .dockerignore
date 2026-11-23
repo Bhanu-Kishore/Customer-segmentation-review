@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.git/
+.github/
+.idea/
+.pytest_cache/
+.dvc/
+mlflow.db
+.mlruns/
+data_drift_report.html
+*.md
