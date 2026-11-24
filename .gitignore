@@ -4,3 +4,11 @@ __pycache__/
 .idea/
 mlflow.db
 .mlruns/
+# Local runtime state
+data/app.db
+data/app.db-wal
+data/app.db-shm
+.venv*/
+.tmp-screens/
+mlruns/
+.env

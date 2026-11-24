@@ -1,1 +1,4 @@
 /segmented_customers.csv
+/app.db
+/app.db-wal
+/app.db-shm

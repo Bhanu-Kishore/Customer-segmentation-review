@@ -2,7 +2,10 @@ import streamlit as st
 import pandas as pd
 import joblib
 import numpy as np
+from pathlib import Path
 
+
+BASE_DIR = Path(__file__).resolve().parents[1]
 
 # Page configuration
 st.set_page_config(
@@ -13,8 +16,8 @@ st.set_page_config(
 
 
 # Load model and scaler
-model = joblib.load("models/kmeans_model.pkl")
-scaler = joblib.load("models/scaler.pkl")
+model = joblib.load(BASE_DIR / "models" / "kmeans_model.pkl")
+scaler = joblib.load(BASE_DIR / "models" / "scaler.pkl")
 
 
 # Title
@@ -88,9 +91,11 @@ if st.button("Predict Customer Segment"):
 # Dataset section
 st.header("Customer Dataset")
 
-df = pd.read_csv(
-    "data/segmented_customers.csv"
-)
+data_path = BASE_DIR / "data" / "segmented_customers.csv"
+if not data_path.is_file():
+    data_path = BASE_DIR / "data" / "customers.csv"
+
+df = pd.read_csv(data_path)
 
 st.dataframe(
     df,
@@ -99,12 +104,13 @@ st.dataframe(
 
 
 # Segment statistics
-st.header("Segment Analysis")
+if "Segment" in df.columns:
+    st.header("Segment Analysis")
 
-segment_counts = (
-    df["Segment"]
-    .value_counts()
-    .sort_index()
-)
+    segment_counts = (
+        df["Segment"]
+        .value_counts()
+        .sort_index()
+    )
 
-st.bar_chart(segment_counts)
+    st.bar_chart(segment_counts)

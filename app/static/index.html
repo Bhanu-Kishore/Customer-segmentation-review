@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Customer segmentation analytics powered by K-Means and FastAPI." />
+  <title>SegmentIQ · Customer Segmentation</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='43' font-family='Arial' font-size='32' font-weight='700' fill='white' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">K</div>
+        <div class="brand-text">
+          <strong>SegmentIQ</strong>
+          <span>Customer Segmentation</span>
+        </div>
+      </div>
+
+      <nav class="nav" id="main-nav" aria-label="Main navigation">
+        <button class="nav-item active" data-view="dashboard" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6V11h-6v9Zm0-16v5h6V4h-6Z"/></svg>
+          <span>Dashboard</span>
+        </button>
+        <button class="nav-item" data-view="customers" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3Zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3Zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5Zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5Z"/></svg>
+          <span>Customers</span>
+        </button>
+        <button class="nav-item" data-view="segmentation" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5Zm0 7.24L5.53 6 12 2.76 18.47 6 12 9.24ZM2 17l10 5 10-5-2.09-1.05L12 19.67l-7.91-3.72L2 17Zm0-5 10 5 10-5-2.09-1.05L12 14.67l-7.91-3.72L2 12Z"/></svg>
+          <span>Segmentation</span>
+        </button>
+        <button class="nav-item" data-view="analytics" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9.2h3V19H5V9.2ZM10.6 5h2.8v14h-2.8V5Zm5.6 8H19v6h-2.8v-6Z"/></svg>
+          <span>Analytics</span>
+        </button>
+        <button class="nav-item" data-view="model" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.62l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.49.42l-.36 2.54c-.59.24-1.13.55-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.74 8.86a.5.5 0 0 0 .12.62l2.03 1.58c-.04.31-.06.63-.06.94 0 .31.02.63.06.94l-2.03 1.58a.5.5 0 0 0-.12.62l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.39 1.04.7 1.63.94l.36 2.54c.04.24.25.42.49.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.55 1.63-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.62l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/></svg>
+          <span>Model &amp; Drift</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a class="docs-link" href="/docs" target="_blank" rel="noopener">API documentation <span aria-hidden="true">&#8599;</span></a>
+        <span>FastAPI &middot; K-Means &middot; MLflow</span>
+      </div>
+    </aside>
+
+    <div class="backdrop" id="backdrop"></div>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn menu-btn" id="menu-toggle" type="button" aria-label="Toggle navigation">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2H3V6Zm0 5h18v2H3v-2Zm0 5h18v2H3v-2Z"/></svg>
+        </button>
+        <div class="page-heading">
+          <h1 id="page-title">Dashboard</h1>
+          <p id="page-subtitle">Live overview of your customer segments.</p>
+        </div>
+        <div class="topbar-actions">
+          <span class="status-pill" id="status-pill">
+            <span class="status-dot"></span>
+            <span id="status-text">Connecting...</span>
+          </span>
+          <button class="btn btn-ghost" id="refresh-btn" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35Z"/></svg>
+            Refresh
+          </button>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- ============================ DASHBOARD ============================ -->
+        <section class="view active" id="view-dashboard" aria-label="Dashboard">
+          <div class="kpi-grid" id="kpi-grid">
+            <div class="kpi-skeleton"></div>
+            <div class="kpi-skeleton"></div>
+            <div class="kpi-skeleton"></div>
+            <div class="kpi-skeleton"></div>
+          </div>
+
+          <div class="grid two-col">
+            <article class="card">
+              <header class="card-head">
+                <div>
+                  <h2>Segment distribution</h2>
+                  <p>Share of customers in each K-Means cluster</p>
+                </div>
+              </header>
+              <div class="chart-box"><canvas id="chart-segments" aria-label="Segment distribution chart"></canvas></div>
+            </article>
+
+            <article class="card">
+              <header class="card-head">
+                <div>
+                  <h2>Income vs spending</h2>
+                  <p>Every customer plotted by cluster membership</p>
+                </div>
+              </header>
+              <div class="chart-box"><canvas id="chart-scatter" aria-label="Income versus spending scatter chart"></canvas></div>
+            </article>
+          </div>
+
+          <article class="card">
+            <header class="card-head">
+              <div>
+                <h2>Segment insights</h2>
+                <p>Profiles generated from the model centroids and live customer data</p>
+              </div>
+            </header>
+            <div class="segment-grid" id="segment-cards"></div>
+          </article>
+
+          <article class="card">
+            <header class="card-head">
+              <div>
+                <h2>Recently added customers</h2>
+                <p>Latest records and their predicted segments</p>
+              </div>
+              <button class="btn btn-ghost btn-sm" type="button" data-go="customers">View all</button>
+            </header>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>ID</th><th>Name</th><th>Age</th><th>Income</th><th>Spending</th><th>Segment</th></tr>
+                </thead>
+                <tbody id="recent-table-body"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- ============================ CUSTOMERS ============================ -->
+        <section class="view" id="view-customers" aria-label="Customers">
+          <article class="card">
+            <header class="card-head card-head-wrap">
+              <div>
+                <h2>Customer directory</h2>
+                <p>Create, update, delete and re-segment customer records</p>
+              </div>
+              <div class="toolbar">
+                <div class="search-field">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14Z"/></svg>
+                  <input type="search" id="customer-search" placeholder="Search by name or ID" aria-label="Search customers" />
+                </div>
+                <select id="customer-segment-filter" aria-label="Filter by segment">
+                  <option value="">All segments</option>
+                </select>
+                <select id="page-size" aria-label="Rows per page">
+                  <option value="10">10 / page</option>
+                  <option value="20">20 / page</option>
+                  <option value="50">50 / page</option>
+                </select>
+                <button class="btn btn-ghost btn-sm" id="export-csv-btn" type="button">Export CSV</button>
+                <button class="btn btn-primary" id="add-customer-btn" type="button">+ Add customer</button>
+              </div>
+            </header>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Name</th><th>Age</th><th>Annual income</th>
+                    <th>Spending</th><th>Frequency</th><th>Segment</th><th class="align-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="customers-table-body"></tbody>
+              </table>
+              <div class="empty-state" id="customers-empty" hidden>
+                <strong>No customers found</strong>
+                <span>Adjust the filters or add a new customer to get started.</span>
+              </div>
+            </div>
+
+            <footer class="table-footer">
+              <span id="pagination-info">Loading...</span>
+              <div class="pager">
+                <button class="btn btn-ghost btn-sm" id="prev-page" type="button">Previous</button>
+                <span class="page-indicator" id="page-indicator">1 / 1</span>
+                <button class="btn btn-ghost btn-sm" id="next-page" type="button">Next</button>
+              </div>
+            </footer>
+          </article>
+        </section>
+
+        <!-- ========================== SEGMENTATION ========================== -->
+        <section class="view" id="view-segmentation" aria-label="Segmentation">
+          <div class="grid two-col align-start">
+            <article class="card">
+              <header class="card-head">
+                <div>
+                  <h2>Score a new customer</h2>
+                  <p>The trained K-Means model assigns the closest segment</p>
+                </div>
+              </header>
+              <form id="predict-form" class="form-grid" novalidate>
+                <div class="field span-2">
+                  <label for="pred-name">Customer name <span class="optional">(optional)</span></label>
+                  <input id="pred-name" type="text" maxlength="80" placeholder="e.g. Priya Sharma" autocomplete="off" />
+                </div>
+                <div class="field">
+                  <label for="pred-age">Age</label>
+                  <input id="pred-age" type="number" min="18" max="100" value="30" required />
+                </div>
+                <div class="field">
+                  <label for="pred-income">Annual income (USD)</label>
+                  <input id="pred-income" type="number" min="1000" max="1000000" step="500" value="45000" required />
+                </div>
+                <div class="field">
+                  <label for="pred-spending">Spending score (0-100)</label>
+                  <input id="pred-spending" type="number" min="0" max="100" step="1" value="60" required />
+                </div>
+                <div class="field">
+                  <label for="pred-frequency">Purchases per year</label>
+                  <input id="pred-frequency" type="number" min="0" max="365" step="1" value="10" required />
+                </div>
+                <div class="form-actions span-2">
+                  <button type="submit" class="btn btn-primary" id="predict-btn">Run segmentation</button>
+                  <button type="button" class="btn btn-ghost" id="save-customer-btn" disabled>Save as customer</button>
+                </div>
+              </form>
+            </article>
+
+            <article class="card result-card">
+              <header class="card-head">
+                <div>
+                  <h2>Prediction result</h2>
+                  <p>Closest centroid and similarity to the segment profile</p>
+                </div>
+              </header>
+
+              <div class="result-empty" id="result-empty">
+                <div class="empty-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5Zm0 7.24L5.53 6 12 2.76 18.47 6 12 9.24ZM2 17l10 5 10-5-2.09-1.05L12 19.67l-7.91-3.72L2 17Zm0-5 10 5 10-5-2.09-1.05L12 14.67l-7.91-3.72L2 12Z"/></svg>
+                </div>
+                <strong>No prediction yet</strong>
+                <span>Fill in the customer profile and run the segmentation model.</span>
+              </div>
+
+              <div class="result-content" id="result-content" hidden>
+                <div class="result-headline">
+                  <span class="segment-badge" id="result-segment-badge">Segment</span>
+                  <h3 id="result-name">Segment name</h3>
+                  <p id="result-description">Segment description</p>
+                </div>
+                <div class="result-metrics">
+                  <div class="metric-tile">
+                    <span>Closest-centroid score</span>
+                    <strong id="result-similarity">-</strong>
+                  </div>
+                  <div class="metric-tile">
+                    <span>Scaled distance</span>
+                    <strong id="result-distance">-</strong>
+                  </div>
+                </div>
+                <div class="chart-box compact"><canvas id="chart-distances" aria-label="Distance to each centroid chart"></canvas></div>
+                <div>
+                  <h4 class="mini-title">Typical customer in this segment</h4>
+                  <div class="profile-tiles" id="result-profile"></div>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <article class="card">
+            <header class="card-head">
+              <div>
+                <h2>Segment reference</h2>
+                <p>Average profile of each cluster in the current customer base</p>
+              </div>
+            </header>
+            <div class="segment-grid" id="segment-reference"></div>
+          </article>
+        </section>
+
+        <!-- ============================ ANALYTICS ============================ -->
+        <section class="view" id="view-analytics" aria-label="Analytics">
+          <div class="grid two-col">
+            <article class="card">
+              <header class="card-head"><div><h2>Age distribution</h2><p>Customers grouped by age band</p></div></header>
+              <div class="chart-box"><canvas id="chart-age" aria-label="Age distribution chart"></canvas></div>
+            </article>
+            <article class="card">
+              <header class="card-head"><div><h2>Income distribution</h2><p>Customers grouped by annual income</p></div></header>
+              <div class="chart-box"><canvas id="chart-income" aria-label="Income distribution chart"></canvas></div>
+            </article>
+            <article class="card">
+              <header class="card-head"><div><h2>Purchase frequency</h2><p>Purchases per year by band</p></div></header>
+              <div class="chart-box"><canvas id="chart-frequency" aria-label="Purchase frequency chart"></canvas></div>
+            </article>
+            <article class="card">
+              <header class="card-head"><div><h2>Spending score by segment</h2><p>Average spending score per cluster</p></div></header>
+              <div class="chart-box"><canvas id="chart-segment-metrics" aria-label="Average spending by segment chart"></canvas></div>
+            </article>
+          </div>
+
+          <article class="card">
+            <header class="card-head"><div><h2>Segment comparison</h2><p>Averages computed from live customer records</p></div></header>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Segment</th><th>Customers</th><th>Avg age</th><th>Avg income</th><th>Avg spending</th><th>Avg frequency</th><th>Share</th></tr>
+                </thead>
+                <tbody id="analytics-table-body"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- ============================== MODEL ============================== -->
+        <section class="view" id="view-model" aria-label="Model and drift">
+          <article class="card">
+            <header class="card-head">
+              <div>
+                <h2>Production model</h2>
+                <p>Artifacts served by this FastAPI instance</p>
+              </div>
+              <span class="model-state" id="model-state">Loading...</span>
+            </header>
+            <div class="stat-grid" id="model-stats"></div>
+          </article>
+
+          <div class="grid two-col">
+            <article class="card">
+              <header class="card-head"><div><h2>Cluster centroids</h2><p>Average feature values per K-Means centroid</p></div></header>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr><th>Segment</th><th>Avg age</th><th>Avg income</th><th>Avg spending</th><th>Avg frequency</th></tr>
+                  </thead>
+                  <tbody id="centers-table-body"></tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="card">
+              <header class="card-head"><div><h2>API surface</h2><p>Endpoints exposed by this deployment</p></div></header>
+              <ul class="endpoint-list">
+                <li><code>GET</code><span>/health</span><em>Liveness and readiness probe</em></li>
+                <li><code>GET</code><span>/api/summary</span><em>KPIs and segment overview</em></li>
+                <li><code>GET</code><span>/api/customers</span><em>Paginated customer directory</em></li>
+                <li><code>POST</code><span>/api/customers</span><em>Create and score a customer</em></li>
+                <li><code>PUT</code><span>/api/customers/{id}</span><em>Update and re-score a customer</em></li>
+                <li><code>DELETE</code><span>/api/customers/{id}</span><em>Remove a customer</em></li>
+                <li><code>POST</code><span>/api/predict</span><em>Score without saving</em></li>
+                <li><code>GET</code><span>/api/analytics</span><em>Chart-ready aggregates</em></li>
+                <li><code>GET</code><span>/docs</span><em>Interactive OpenAPI documentation</em></li>
+              </ul>
+            </article>
+          </div>
+
+          <article class="card">
+            <header class="card-head">
+              <div>
+                <h2>Data drift monitoring</h2>
+                <p>Evidently report comparing the reference dataset with incoming customer data</p>
+              </div>
+              <div class="toolbar">
+                <a class="btn btn-ghost btn-sm" id="open-drift-link" href="/api/drift-report" target="_blank" rel="noopener">Open in new tab</a>
+                <button class="btn btn-primary btn-sm" id="load-drift-btn" type="button">Load report</button>
+              </div>
+            </header>
+            <div class="drift-status" id="drift-status">Checking report status...</div>
+            <div class="drift-frame" id="drift-frame-container" hidden>
+              <iframe id="drift-frame" title="Evidently data drift report" loading="lazy"></iframe>
+            </div>
+          </article>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- ============================== MODALS ============================== -->
+  <div class="modal-backdrop" id="customer-modal-backdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head">
+        <div>
+          <h2 id="modal-title">Add customer</h2>
+          <p>The model will assign a segment automatically.</p>
+        </div>
+        <button class="icon-btn" type="button" id="modal-close" aria-label="Close dialog">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.7 2.88 18.3 9.17 12 2.88 5.71 4.29 4.3l6.3 6.29 6.3-6.29 1.41 1.41Z"/></svg>
+        </button>
+      </div>
+      <form id="customer-form" class="form-grid" novalidate>
+        <div class="field span-2">
+          <label for="field-name">Name</label>
+          <input id="field-name" type="text" maxlength="80" placeholder="Customer name" />
+        </div>
+        <div class="field">
+          <label for="field-age">Age</label>
+          <input id="field-age" type="number" min="18" max="100" required />
+        </div>
+        <div class="field">
+          <label for="field-income">Annual income (USD)</label>
+          <input id="field-income" type="number" min="1000" max="1000000" step="500" required />
+        </div>
+        <div class="field">
+          <label for="field-spending">Spending score (0-100)</label>
+          <input id="field-spending" type="number" min="0" max="100" step="1" required />
+        </div>
+        <div class="field">
+          <label for="field-frequency">Purchases per year</label>
+          <input id="field-frequency" type="number" min="0" max="365" step="1" required />
+        </div>
+        <p class="form-error span-2" id="modal-error" hidden></p>
+        <div class="form-actions span-2">
+          <button type="button" class="btn btn-ghost" id="modal-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modal-submit">Save customer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="confirm-backdrop" hidden>
+    <div class="modal modal-sm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
+      <div class="modal-head">
+        <div>
+          <h2 id="confirm-title">Delete customer</h2>
+          <p id="confirm-message">This action cannot be undone.</p>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-ghost" id="confirm-cancel">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirm-ok">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <script src="/static/vendor/chart.umd.min.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

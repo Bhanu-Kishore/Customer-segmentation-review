@@ -2,6 +2,7 @@ name: Customer Segmentation CI
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
@@ -16,11 +17,21 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
 
-      - name: Install dependencies
+      - name: Install runtime and test dependencies
         run: |
-          pip install pandas numpy scikit-learn joblib mlflow
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pytest httpx
 
-      - name: Train model
+      - name: Run API tests
+        run: python -m pytest
+
+      - name: Retrain the segmentation model
+        run: python src/train.py
+
+      - name: Check that artifacts were produced
         run: |
-          python src/train.py
+          test -f models/kmeans_model.pkl
+          test -f models/scaler.pkl
+          test -f models/model_metadata.json

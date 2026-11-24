@@ -1,0 +1,67 @@
+{
+  "algorithm": "KMeans",
+  "n_clusters": 3,
+  "random_state": 42,
+  "features": [
+    "Age",
+    "AnnualIncome",
+    "SpendingScore",
+    "PurchaseFrequency"
+  ],
+  "rows": 20,
+  "inertia": 6.8574,
+  "silhouette_score": 0.5717,
+  "trained_at": "2026-11-24T04:52:33+00:00",
+  "sklearn_version": "1.9.1",
+  "numpy_version": "2.4.6",
+  "pandas_version": "3.0.6",
+  "scaler": {
+    "mean": [
+      37.15,
+      58750.0,
+      50.65,
+      8.75
+    ],
+    "scale": [
+      10.9146,
+      26780.3566,
+      25.423,
+      4.9282
+    ]
+  },
+  "cluster_profiles": [
+    {
+      "segment": 0,
+      "name": "Young Enthusiasts",
+      "description": "Younger, lower-income shoppers who spend heavily and buy often. Engage them with loyalty perks, trend-led campaigns and mobile offers.",
+      "size": 7,
+      "share": 0.35,
+      "avg_age": 25.29,
+      "avg_income": 29000.0,
+      "avg_spending_score": 79.71,
+      "avg_purchase_frequency": 14.57
+    },
+    {
+      "segment": 1,
+      "name": "Affluent Conservatives",
+      "description": "High-income customers who spend carefully and rarely. Nurture them with premium value propositions and personal outreach.",
+      "size": 8,
+      "share": 0.4,
+      "avg_age": 49.0,
+      "avg_income": 87750.0,
+      "avg_spending_score": 23.12,
+      "avg_purchase_frequency": 3.62
+    },
+    {
+      "segment": 2,
+      "name": "Balanced Mainstream",
+      "description": "Moderate income and moderate spending. Grow them with cross-sell, seasonal promotions and loyalty tiers.",
+      "size": 5,
+      "share": 0.25,
+      "avg_age": 34.8,
+      "avg_income": 54000.0,
+      "avg_spending_score": 54.0,
+      "avg_purchase_frequency": 8.8
+    }
+  ]
+}

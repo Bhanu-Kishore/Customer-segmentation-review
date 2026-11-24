@@ -1,0 +1,11 @@
+# Development and MLOps tooling (not installed on Render).
+-r requirements.txt
+
+pytest==9.0.2
+httpx==0.28.1
+mlflow==3.16.1
+dvc==3.67.1
+evidently==0.7.23
+streamlit==1.64.0
+matplotlib==3.11.2
+plotly==5.24.1

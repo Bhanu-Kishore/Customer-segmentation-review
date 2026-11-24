@@ -1,27 +1,15 @@
-import pandas as pd
-from evidently import Report
-from evidently.presets import DataDriftPreset
+"""Backwards-compatible entry point for the data-drift report.
 
-# Reference data
-reference_data = pd.read_csv("data/customers.csv")
+Prefer: python -m monitoring.monitor
+"""
 
-# Current data
-current_data = pd.read_csv("data/current_customers.csv")
+from __future__ import annotations
 
-# Create monitoring report
-report = Report(
-    metrics=[
-        DataDriftPreset()
-    ]
-)
+import runpy
+from pathlib import Path
 
-# Run report
-result = report.run(
-    reference_data=reference_data,
-    current_data=current_data
-)
-
-# Save HTML report
-result.save_html("data_drift_report.html")
-
-print("Data drift monitoring report generated successfully!")
+if __name__ == "__main__":
+    runpy.run_path(
+        str(Path(__file__).resolve().parent / "monitoring" / "monitor.py"),
+        run_name="__main__",
+    )
