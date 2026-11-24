@@ -4,7 +4,9 @@ End-to-end MLOps project that segments customers with K-Means clustering and ser
 
 The project follows a production-style lifecycle: data versioning with DVC, experiment tracking with MLflow, model training with scikit-learn, automated tests, containerisation with Docker, CI with GitHub Actions, data-drift monitoring with Evidently, and public deployment on Render.
 
-> **Live demo:** see [Deployment](#deployment) — the public Render URL is added after the first deployment.
+> **Live demo:** <https://customer-segmentation-review.onrender.com>
+>
+> Free tier — the instance spins down after inactivity, so the first request can take ~50 seconds.
 
 ## Features
 
@@ -185,6 +187,9 @@ The suite covers health checks, static assets, pagination, search/filtering, sum
 - **Streamlit (optional):** `streamlit run app/web.py` provides the earlier lightweight client.
 
 ## Deployment (Render)
+
+The app is deployed as a Render Web Service in Docker runtime:
+**<https://customer-segmentation-review.onrender.com>**
 
 The repository includes a [render.yaml](render.yaml) blueprint for a free Render Web Service.
 
